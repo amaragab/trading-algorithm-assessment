@@ -58,25 +58,48 @@ public class MyAlgoTest extends AbstractAlgoTest {
         assertTrue(actionString.contains("price=" + bestBidPrice));
     }
 
+    //private long calculateProfitOrLoss(long buyPrice, long sellPrice, long quantity) {
+      //  return (sellPrice - buyPrice) * quantity;
+    //}
+
+    private long calculateProfitOrLoss(long buyPrice, long sellPrice, long quantity) {
+        return (sellPrice - buyPrice) * quantity;
+    }
+
+    private void logProfitOrLoss(long profitOrLoss) {
+        if (profitOrLoss > 0) {
+            logger.info("Expected Profit: " + profitOrLoss);
+        } else {
+            logger.info("Expected Loss: " + (-profitOrLoss));
+        }
+    }
+    
     @Test
     public void testCancelBuyOrder() throws Exception {
         // Test case where the best ask price is above the SELL_THRESHOLD, should cancel a buy order
 
         long bestBidPrice = 115L; 
-        long bestAskPrice = 125L; // Above SELL_THRESHOLD
-
+        long bestAskPrice = 125L; // Above SELL_THRESHOLD........
+       
+//Mock buy order that should get cancelled
         ChildOrder childOrder = mockOrder(Side.BUY, 100L, 110L);
         SimpleAlgoState state = mockState(bestBidPrice, bestAskPrice, Side.BUY, 100L, 110L);
+
+        //send market data with updated ask price 
         send(createSampleMarketData(bestBidPrice, bestAskPrice));
 
+        //evaluate the algo logic
         var action = createAlgoLogic().evaluate(state);
 
+        //assert that the action taken is to cancel the buy order
         assertTrue(action instanceof CancelChildOrder);
         CancelChildOrder cancelAction = (CancelChildOrder) action;
 
         // Calculate expected profit: (bestAskPrice - buyPrice) * quantity
-        long expectedProfit = (bestAskPrice - 100L) * 50L;
-        logger.info("Expected Profit: " + expectedProfit);
+        long expectedProfitOrLoss = calculateProfitOrLoss(100L, bestAskPrice, 50L);
+        logProfitOrLoss(expectedProfitOrLoss);
+
+        
 
         assertNotNull(cancelAction.toString());
     }
@@ -107,6 +130,13 @@ public class MyAlgoTest extends AbstractAlgoTest {
         // Second tick: Above SELL_THRESHOLD, should cancel the buy order
         send(createTick2());
         assertEquals(0, container.getState().getActiveChildOrders().size());
+
+        // Log profit or loss based on ask price and buy price......
+        long buyPrice = 95L;
+        long sellPrice = 125L;
+        long profitOrLoss = calculateProfitOrLoss(buyPrice, sellPrice, 50L);
+        logProfitOrLoss(profitOrLoss);
+
 
         // Third tick: No action should be taken (prices within thresholds)
         send(createTick3());

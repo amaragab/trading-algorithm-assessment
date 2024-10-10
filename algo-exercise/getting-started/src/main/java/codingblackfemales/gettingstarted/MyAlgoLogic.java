@@ -77,16 +77,33 @@ public class MyAlgoLogic implements AlgoLogic {
             //if order to cancel is not null, then an order has been identified for cancellation which could be due to unfavourable market conditions
         if (orderToCancel != null) {
             
-            //to calculate profit
+            //to calculate profit or loss
             long buyPrice = buyPrices.getOrDefault(orderToCancel.getOrderId(), 0L);
-                long profit = (bestAskPrice - buyPrice) * ORDER_QUANTITY;
+            long profit = (bestAskPrice - buyPrice) * ORDER_QUANTITY;
             //Makes sure algo doesn't attempt to sell without having a corresponding buy order 
-            logger.info("Cancelling order at price: " + orderToCancel.getPrice()+ ", Profit: " + profit);
+
+           // Handle profit scenarios
+        if (profit > 0) {
+            logger.info("Cancelling order at price: " + orderToCancel.getPrice() + ", Profit: " + profit);
+            buyPrices.remove(buyPrice); // remove buy price if order is canceled
+
+            return new CancelChildOrder(orderToCancel);
+
+        } else if (profit == 0) {
+            logger.info("Order at price: " + orderToCancel.getPrice() + " has no profit. No action taken.");
+            return NoAction.NoAction; 
+        } else { // profit < 0
+            long loss = -profit;
+            logger.info("Cancelling order at price: " + orderToCancel.getPrice() + ", Loss: " + loss);
+            buyPrices.remove(buyPrice); // remove buy price if order is canceled
+            
             return new CancelChildOrder(orderToCancel);
         }
     }
+    }
+
     //Default if no actions are met.
         return NoAction.NoAction;
-    }
+}
 }
 

@@ -49,49 +49,54 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
          // No fill should occur immediately as the market price hasn’t reached the buy order price
          assertEquals(0L, filledQuantity);
     }
+    private long calculateProfitOrLoss(long buyPrice, long sellPrice, long quantity) {
+        return (sellPrice - buyPrice) * quantity;
+    }
 
     @Test
     public void testSellCondition() throws Exception {
         // Test case where the best ask price is above the SELL_THRESHOLD, should cancel a buy order
+ // Send market data where ask price is above the SELL_THRESHOLD
+         long newBidPrice = 110L;  
+         long newAskPrice = 130L;  
+         send(createMarketTick(newBidPrice, newAskPrice)); // bidPrice=110L, askPrice=130L
+         var state = container.getState();
+         assertEquals(0, state.getChildOrders().size());
 
-        // Send market data where ask price is above the SELL_THRESHOLD
-        send(createMarketTick(110L, 130L)); // bidPrice=110L, askPrice=130L
-
-        // Create a buy order to be canceled
-        send(createMarketTick(95L, 110L)); // bidPrice=95L, askPrice=110L
-
-        // Get the state of the order book after the market tick
-        var state = container.getState();
+         // Create a buy order to be canceled
+         long buyPrice = 95L;  
+         long askPrice = 110L; 
+         send(createMarketTick(buyPrice, askPrice)); // bidPrice=95L, askPrice=110
+         state = container.getState();
+         assertEquals(1, state.getChildOrders().size()); 
         logger.info("State after creating buy order: " + state);
 
-        // Check that a buy order was created first
-        assertEquals(1, state.getChildOrders().size());
+       
+    //    assertEquals(1, state.getChildOrders().size());
+    //     assertEquals(buyPrice, state.getChildOrders().get(0).getPrice()); // Verify the price of the buy order
         assertEquals(95L, state.getChildOrders().get(0).getPrice()); // Verify the price of the buy order
 
-        // Send a market tick that should trigger the cancel condition
-        //send(createMarketTick(115L, 125L)); // bidPrice=115L, askPrice=125L..........
+    //     // Get the state of the order book after the market tick
+    //     state = container.getState();
+    //    assertEquals(0, state.getChildOrders().size());
+    //     logger.info("State after sending cancel condition: " + state);
 
-        // Get the state of the order book after the market tick
-        state = container.getState();
-        logger.info("State after sending cancel condition: " + state);
+    //     // Calculate expected profit: (bestAskPrice - buyPrice) * quantity
+      //  long expectedProfit = (130L - 95L) * 50L;
+    //logger.info("Expected Profit: " + expectedProfit);
 
-        // Calculate expected profit: (bestAskPrice - buyPrice) * quantity
-       long expectedProfit = (130L - 95L) * 50L;
-       logger.info("Expected Profit: " + expectedProfit);
+    //    // Calculate expected profit/loss
+        long profitOrLoss = calculateProfitOrLoss(buyPrice, newAskPrice, 50L);
+        logger.info(profitOrLoss > 0 ? "Expected Profit: " + profitOrLoss : "Expected Loss: " + (-profitOrLoss));
 
-    assertEquals(1, state.getChildOrders().size());
-
-        // Check that the buy order was canceled
-        assertEquals(1, state.getChildOrders().size());
-
-         // Calculate and assert the total filled quantity
+          // Calculate and assert the total filled quantity
          long filledQuantity = state.getChildOrders().stream()
-         .map(ChildOrder::getFilledQuantity)
-         .reduce(Long::sum)
-         .orElse(0L);
+          .map(ChildOrder::getFilledQuantity)
+          .reduce(Long::sum)
+          .orElse(0L);
 
-        // No fill should occur as the order was canceled
-        assertEquals(0L, filledQuantity);
+    //     // No fill should occur as the order was canceled
+         assertEquals(0L, filledQuantity);
     }
 
     @Test
@@ -121,13 +126,24 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
     public void testDispatchThroughSequencer() throws Exception {
         // Test the sequence of actions through multiple market ticks
 
-        // First tick: Below BUY_THRESHOLD, should create a buy order
-        send(createMarketTick(95L, 110L)); // bidPrice=95L, askPrice=110L
+// First tick: Above SELL_THRESHOLD, should cancel the buy order.........
+       long newBidPrice = 115L; 
+       long newAskPrice = 130L; 
+       send(createMarketTick(newBidPrice, newAskPrice));
+        assertEquals(0, container.getState().getActiveChildOrders().size());
+        
+        // Second tick: Below BUY_THRESHOLD, should create a buy order
+        long buyPrice = 95L;  
+        long askPrice = 110L;  
+        send(createMarketTick(buyPrice, askPrice)); // bidPrice=95L, askPrice=110L
         assertEquals(1, container.getState().getChildOrders().size());
 
-        // Second tick: Above SELL_THRESHOLD, should cancel the buy order..............
-        //send(createMarketTick(115L, 125L)); // bidPrice=115L, askPrice=125L
-        //assertEquals(0, container.getState().getActiveChildOrders().size());
+       
+
+   // Check profit or loss after cancellation
+   long profitOrLoss = calculateProfitOrLoss(buyPrice, newAskPrice, 50L);
+   logger.info(profitOrLoss > 0 ? "Expected Profit: " + profitOrLoss : "Expected Loss: " + (-profitOrLoss));
+
 
         // Third tick: No action should be taken (prices within thresholds)
         send(createMarketTick(105L, 115L)); // bidPrice=105L, askPrice=115L

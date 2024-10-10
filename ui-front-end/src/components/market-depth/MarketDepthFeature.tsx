@@ -33,7 +33,7 @@ export const MarketDepthFeature = () => {
   return (
     <div>
       {/* Market Depth Table */}
-      {showPanels && <MarketDepthPanel data={testData} />}
+      {showPanels && <MarketDepthPanel data={testData} />}s
 
       {/* Button to toggle visibility of the table */}
       <div style={{ textAlign: 'center', marginTop: '20px' }}>
