@@ -40,7 +40,7 @@ const getWidthBasedOnQuantity = (quantity: number) => {
           {data.map((row, index) => (
             <tr key={index}>
               {/* Row numbering */}
-      <td>{index}</td> {/* Add this to display the row number */}
+      <td>{index}</td> 
               {/* Bid Side */}
               <td>
                 <div

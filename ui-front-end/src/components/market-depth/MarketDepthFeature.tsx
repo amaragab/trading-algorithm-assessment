@@ -42,36 +42,8 @@ export const MarketDepthFeature = () => {
         </button>
       </div>
 
-      {/* Red/Blue Panels */}
-      {showPanels && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-          <div
-            style={{
-              backgroundColor: 'red',
-              width: '200px',
-              height: '200px',
-              color: 'white',
-              textAlign: 'center',
-              padding: '10px'
-            }}
-          >
-            Bid Side
-          </div>
-          <div
-            style={{
-              backgroundColor: 'blue',
-              width: '200px',
-              height: '200px',
-              color: 'white',
-              textAlign: 'center',
-              padding: '10px',
-              marginLeft: '20px'
-            }}
-          >
-            Ask Side
-          </div>
-        </div>
-      )}
+      
+    
     </div>
   );
           };
