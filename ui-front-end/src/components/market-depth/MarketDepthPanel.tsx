@@ -24,7 +24,7 @@ const getWidthBasedOnQuantity = (quantity: number) => {
       <table className="MarketDepthPanel">
         <thead>
           <tr>
-          <th>#</th> {/* New column header for row numbering */}
+          <th></th> {/* New column header for row numbering */}
             <th colSpan={2}>Bid</th>
             <th colSpan={2}>Ask</th>
           </tr>
