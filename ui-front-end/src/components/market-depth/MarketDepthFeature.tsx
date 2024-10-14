@@ -3,8 +3,16 @@ import { MarketDepthPanel } from './MarketDepthPanel';
 import "./MarketDepthPanel.css";
 
 
-import { MarketDepthRow } from '../type';
+//import { MarketDepthRow } from '../type';
 
+interface MarketDepthRow {
+  symbolLevel: string;
+  level: number;
+  bid: number;
+  bidQuantity: number;
+  offer: number;
+  offerQuantity: number;
+}
 
 // prettier-ignore
  const testData: MarketDepthRow[] = [

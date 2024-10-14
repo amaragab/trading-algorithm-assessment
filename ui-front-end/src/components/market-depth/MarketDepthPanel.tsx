@@ -1,7 +1,15 @@
 import { PriceCell } from './PriceCell';
-import { MarketDepthRow } from '../type';
+//import { MarketDepthRow } from '../type';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa'; // FontAwesome icons for arrows
 
+interface MarketDepthRow {
+  symbolLevel: string;
+  level: number;
+  bid: number;
+  bidQuantity: number;
+  offer: number;
+  offerQuantity: number;
+}
 
 interface MarketDepthPanelProps {
     data: MarketDepthRow[];
