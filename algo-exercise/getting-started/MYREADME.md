@@ -10,6 +10,7 @@ MYAlgoLogic
 
 Overview
 MyAlgoLogic implements the AlgoLogic interface and encapsulates the algorithm's decision-making logic for trading operations. It evaluates market conditions and decides when to create or cancel child orders based on predefined thresholds for buying and selling.
+
 Key Features
 * Buy and Sell Thresholds:
     * BUY_THRESHOLD: The algorithm initiates a buy order when the best bid price is below this threshold (set at 100). 
@@ -29,6 +30,7 @@ Key Features
         * If profit > 0: Cancels the buy order and logs the profit.
         * If profit == 0: Logs that no action is taken.
         * If profit < 0: Cancels the buy order and logs the loss.
+        
 Methods
 * evaluate(SimpleAlgoState state): This method analyzes the current market state to determine if the algorithm should create or cancel orders. It logs the relevant details and returns the appropriate action (create or cancel an order, or no action).
 
