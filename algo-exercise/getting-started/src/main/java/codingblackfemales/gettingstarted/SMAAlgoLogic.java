@@ -8,8 +8,6 @@ import codingblackfemales.action.Action;
 import codingblackfemales.action.NoAction;
 import codingblackfemales.sotw.SimpleAlgoState;
 import codingblackfemales.sotw.marketdata.BidLevel;
-import codingblackfemales.sotw.marketdata.AskLevel;
-import codingblackfemales.util.Util;
 import messages.order.Side;
 
 import java.util.LinkedList;
@@ -26,8 +24,8 @@ public class SMAAlgoLogic implements AlgoLogic{
     @Override
     public Action evaluate(SimpleAlgoState state) {
         // Get the best bid level (index 0)
-        if (state.getBidLevels() > 0) { // Check if there are any bid levels
-            BidLevel bestBid = state.getBidAt(0); // Get the best bid at index 0
+        if (state.getBidLevels() > 0) { 
+            BidLevel bestBid = state.getBidAt(0); 
             long currentPrice = bestBid.getPrice();
 
         // Add current price to the window
@@ -38,7 +36,7 @@ public class SMAAlgoLogic implements AlgoLogic{
             priceWindow.poll(); // Remove the oldest price
         }
 
-        // Calculate the Simple Moving Average
+        
         sma = calculateSMA();
 
         // Trading logic based on SMA
@@ -47,7 +45,7 @@ public class SMAAlgoLogic implements AlgoLogic{
         } else if (sma >= SELL_THRESHOLD) {
             // Cancel all child orders
             for (ChildOrder order : state.getActiveChildOrders()) {
-                return new CancelChildOrder(order); // Pass the entire ChildOrder object
+                return new CancelChildOrder(order); 
             }
         }
     }

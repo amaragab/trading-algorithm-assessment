@@ -32,6 +32,24 @@ Key Features
 Methods
 * evaluate(SimpleAlgoState state): This method analyzes the current market state to determine if the algorithm should create or cancel orders. It logs the relevant details and returns the appropriate action (create or cancel an order, or no action).
 
+SMAAlgoLogic
+
+Overview
+SMAAlgoLogic introduces a trading algorithm based on the Simple Moving Average (SMA) indicator. This logic aims to smooth out price data over a specific period to identify potential buy and sell signals. The class evaluates price movements against defined thresholds to execute trades automatically. Although this logic was not fully implemented into the test classes, it represents a planned extension to enhance the existing algorithm.
+
+Key Features
+* Simple Moving Average (SMA):
+Utilizes a moving average over a set time period (SMA_PERIOD = 5) to smooth out short-term fluctuations in market prices.
+If the average price over the period is below the BUY_THRESHOLD (90L), a buy order is created.
+If the average price is above the SELL_THRESHOLD (110L), all active buy orders are canceled.
+
+Methods
+* evaluate(SimpleAlgoState state):
+This method evaluates the current state of the market and makes trading decisions based on the SMA value. It checks the best bid price, adds it to the priceWindow, and calculates the SMA. Depending on whether the SMA meets the thresholds, the method returns either a CreateChildOrder, CancelChildOrder, or NoAction.
+
+* calculateSMA():
+This utility method calculates the SMA by averaging the prices in the priceWindow. The method maintains a fixed period, ensuring that only recent prices are considered.
+
 
 MyAlgoTest
 
