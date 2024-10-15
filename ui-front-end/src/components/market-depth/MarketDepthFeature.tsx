@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import { MarketDepthPanel } from './MarketDepthPanel';
 import "./MarketDepthPanel.css";
 
-
-//import { MarketDepthRow } from '../type';
-
-interface MarketDepthRow {
+export interface MarketDepthRow {
   symbolLevel: string;
   level: number;
   bid: number;
@@ -14,7 +11,6 @@ interface MarketDepthRow {
   offerQuantity: number;
 }
 
-// prettier-ignore
  const testData: MarketDepthRow[] = [
    { symbolLevel:"1230", level: 0, bid: 1000, bidQuantity: 500, offer: 1010, offerQuantity: 700 },
    { symbolLevel:"1231", level: 1, bid: 990, bidQuantity: 700, offer: 1012, offerQuantity: 400 },
@@ -28,15 +24,10 @@ interface MarketDepthRow {
    { symbolLevel:"1239", level: 9, bid: 940, bidQuantity: 200, offer: 1024, offerQuantity: 800 },
  ];
 
-/**
- * TODO
- */
 export const MarketDepthFeature = () => {
   const [showPanels, setShowPanels] = useState(true);
 
-  // Toggle panel visibility
-  const togglePanels = () => setShowPanels(!showPanels);
-
+  const togglePanelsVisibility = () => setShowPanels(!showPanels);
 
   return (
     <div>
@@ -45,7 +36,7 @@ export const MarketDepthFeature = () => {
 
       {/* Button to toggle visibility of the table */}
       <div style={{ textAlign: 'center', marginTop: '20px' }}>
-        <button onClick={togglePanels}>
+        <button onClick={togglePanelsVisibility}>
         {showPanels ? 'Hide Market Depth Table' : 'Show Market Depth Table'}
         </button>
       </div>

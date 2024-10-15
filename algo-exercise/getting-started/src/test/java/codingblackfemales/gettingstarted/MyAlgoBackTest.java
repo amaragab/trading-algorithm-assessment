@@ -13,8 +13,6 @@ import org.junit.Test;
 import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import java.util.List;
-//import org.junit.Test;
 
 import static org.junit.Assert.*;
 
@@ -31,15 +29,15 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
     public void testBuyCondition() throws Exception {
         // Test case where the best bid price is below the BUY_THRESHOLD, should create a buy order
 
-        send(createMarketTick(90L, 100L)); // bidPrice=90L, askPrice=100L
+        send(createMarketTick(90L, 100L));
 
         // Get the state of the order book after the market tick
         var state = container.getState();
 
         // Check that a buy order was created
         assertEquals(1, state.getChildOrders().size());
-        assertEquals(90L, state.getChildOrders().get(0).getPrice()); // Verify the price of the buy order
-        assertEquals(50L, state.getChildOrders().get(0).getQuantity()); // Verify the quantity of the buy order
+        assertEquals(90L, state.getChildOrders().get(0).getPrice()); 
+        assertEquals(50L, state.getChildOrders().get(0).getQuantity()); 
 
         long filledQuantity = state.getChildOrders().stream()
                                    .map(ChildOrder::getFilledQuantity)
@@ -59,33 +57,22 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
  // Send market data where ask price is above the SELL_THRESHOLD
          long newBidPrice = 110L;  
          long newAskPrice = 130L;  
-         send(createMarketTick(newBidPrice, newAskPrice)); // bidPrice=110L, askPrice=130L
+         send(createMarketTick(newBidPrice, newAskPrice)); 
          var state = container.getState();
          assertEquals(0, state.getChildOrders().size());
 
          // Create a buy order to be canceled
          long buyPrice = 95L;  
          long askPrice = 110L; 
-         send(createMarketTick(buyPrice, askPrice)); // bidPrice=95L, askPrice=110
+         send(createMarketTick(buyPrice, askPrice)); 
          state = container.getState();
          assertEquals(1, state.getChildOrders().size()); 
         logger.info("State after creating buy order: " + state);
 
-       
-    //    assertEquals(1, state.getChildOrders().size());
-    //     assertEquals(buyPrice, state.getChildOrders().get(0).getPrice()); // Verify the price of the buy order
-        assertEquals(95L, state.getChildOrders().get(0).getPrice()); // Verify the price of the buy order
+        assertEquals(95L, state.getChildOrders().get(0).getPrice());
 
-    //     // Get the state of the order book after the market tick
-    //     state = container.getState();
-    //    assertEquals(0, state.getChildOrders().size());
-    //     logger.info("State after sending cancel condition: " + state);
-
-    //     // Calculate expected profit: (bestAskPrice - buyPrice) * quantity
-      //  long expectedProfit = (130L - 95L) * 50L;
-    //logger.info("Expected Profit: " + expectedProfit);
-
-    //    // Calculate expected profit/loss
+   
+    // Calculate expected profit/loss
         long profitOrLoss = calculateProfitOrLoss(buyPrice, newAskPrice, 50L);
         logger.info(profitOrLoss > 0 ? "Expected Profit: " + profitOrLoss : "Expected Loss: " + (-profitOrLoss));
 
@@ -95,30 +82,22 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
           .reduce(Long::sum)
           .orElse(0L);
 
-    //     // No fill should occur as the order was canceled
+        // No fill should occur as the order was canceled
          assertEquals(0L, filledQuantity);
     }
 
     @Test
     public void testNoAction() throws Exception {
         // Test case where no conditions are met, should return NoAction
-
-        // Send market data within thresholds where no action should be taken
-        send(createMarketTick(110L, 115L)); // bidPrice=110L, askPrice=115L
-
-        // Get the state of the order book after the market tick
+        send(createMarketTick(110L, 115L)); 
         var state = container.getState();
-
-        // Check that no action was taken (no orders created or canceled)
         assertEquals(0, state.getChildOrders().size());
 
-        // Calculate and assert the total filled quantity
         long filledQuantity = state.getChildOrders().stream()
                                    .map(ChildOrder::getFilledQuantity)
                                    .reduce(Long::sum)
                                    .orElse(0L);
 
-        // No fill should occur as no action was taken
         assertEquals(0L, filledQuantity);
     }
 
@@ -131,11 +110,11 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
        long newAskPrice = 130L; 
        send(createMarketTick(newBidPrice, newAskPrice));
         assertEquals(0, container.getState().getActiveChildOrders().size());
-        
+
         // Second tick: Below BUY_THRESHOLD, should create a buy order
         long buyPrice = 95L;  
         long askPrice = 110L;  
-        send(createMarketTick(buyPrice, askPrice)); // bidPrice=95L, askPrice=110L
+        send(createMarketTick(buyPrice, askPrice)); 
         assertEquals(1, container.getState().getChildOrders().size());
 
        
@@ -150,12 +129,11 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
         assertEquals(1, container.getState().getActiveChildOrders().size());
 
         // Fourth tick: Still no action should be taken (prices within thresholds)
-        send(createMarketTick(100L, 120L)); // bidPrice=100L, askPrice=120L
+        send(createMarketTick(100L, 120L)); 
         assertEquals(1, container.getState().getActiveChildOrders().size());
     }
 
     private UnsafeBuffer createMarketTick(long bidPrice, long askPrice) {
-        // Create and return market data tick with specified bid and ask prices
         return createSampleMarketData(bidPrice, askPrice);
     }
 

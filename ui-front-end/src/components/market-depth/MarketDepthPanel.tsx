@@ -1,32 +1,24 @@
-import { PriceCell } from './PriceCell';
-//import { MarketDepthRow } from '../type';
+import { MarketDepthRow } from './MarketDepthFeature';
 import { FaArrowUp, FaArrowDown } from 'react-icons/fa'; // FontAwesome icons for arrows
 
-interface MarketDepthRow {
-  symbolLevel: string;
-  level: number;
-  bid: number;
-  bidQuantity: number;
-  offer: number;
-  offerQuantity: number;
-}
+
 
 interface MarketDepthPanelProps {
     data: MarketDepthRow[];
   }
   
-// Function to determine color based on price
-const getWidthBasedOnQuantity = (quantity: number) => {
-  const maxQuantity = 4000; // Define a maximum value for scaling
-  const minWidth = 40; // Set a minimum width in percentage
-  const calculatedWidth = (quantity / maxQuantity) * 100; // Percentage width
 
-  // Ensure minimum width and limit the maximum width to 100%
+const getWidthBasedOnQuantity = (quantity: number) => {
+  const maxQuantityScale = 4000;
+  const minWidth = 40;
+  const calculatedWidth = (quantity / maxQuantityScale) * 100; // Percentage width
+
+ 
   return Math.max(minWidth, calculatedWidth); 
 };
 
   export const MarketDepthPanel = (props: MarketDepthPanelProps) => {
-    const { data } = props;  // Destructure the data prop
+    const { data } = props;  
   
     return (
       <table className="MarketDepthPanel">

@@ -1,12 +1,12 @@
 .MarketDepthPanel {
   margin: auto;
   border-collapse: collapse;
-  width: 30%; /* Adjust this width as necessary */
+  width: 30%; 
  
 }
 
 table {
-  font-size: 7px; /* Decrease font size for smaller table */
+  font-size: 7px; 
   height: 20;
 }
 
@@ -22,26 +22,26 @@ th {
 }
 
 td {
-  color: black; /* Ensure text stands out on colored backgrounds */
+  color: black; 
 }
 
 td div {
-  height: 20px; /* Height of the bar */
+  height: 20px; 
 }
 
-tbody tr td:nth-child(1) { /* Row number column */
-  width: 50px; /* Adjust width for the row numbers */
+tbody tr td:nth-child(1) { 
+  width: 50px; 
   text-align: center;
 }
 
-tbody tr td:nth-child(2), /* First quantity column */
-tbody tr td:nth-child(5) { /* Second quantity column */
-  width: 100px; /* Reduce space for the colored bars */
+tbody tr td:nth-child(2), 
+tbody tr td:nth-child(5) { 
+  width: 100px; 
 }
 
-tbody tr td:nth-child(3), /* First price column */
-tbody tr td:nth-child(4) { /* Second price column */
-  width: 100px; /* Reduce width for price columns */
+tbody tr td:nth-child(3), 
+tbody tr td:nth-child(4) { 
+  width: 100px; 
 }
 
 tbody tr td span {

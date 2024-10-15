@@ -32,7 +32,6 @@ public class MyAlgoTest extends AbstractAlgoTest {
 
     @Override
     public AlgoLogic createAlgoLogic() {
-        //this adds your algo logic to the container classes
         return new MyAlgoLogic();
     }
 
@@ -45,7 +44,6 @@ public class MyAlgoTest extends AbstractAlgoTest {
 
         //creates a mock instance of SimpleAlgoState with specified bid and ask prices.
         SimpleAlgoState state = mockState(bestBidPrice, bestAskPrice);
-        //sends a sample market data message to algo.
         send(createSampleMarketData(bestBidPrice, bestAskPrice));
 
         var action = createAlgoLogic().evaluate(state);
@@ -57,10 +55,6 @@ public class MyAlgoTest extends AbstractAlgoTest {
         assertTrue(actionString.contains("quantity=50"));
         assertTrue(actionString.contains("price=" + bestBidPrice));
     }
-
-    //private long calculateProfitOrLoss(long buyPrice, long sellPrice, long quantity) {
-      //  return (sellPrice - buyPrice) * quantity;
-    //}
 
     private long calculateProfitOrLoss(long buyPrice, long sellPrice, long quantity) {
         return (sellPrice - buyPrice) * quantity;
@@ -88,18 +82,15 @@ public class MyAlgoTest extends AbstractAlgoTest {
         //send market data with updated ask price 
         send(createSampleMarketData(bestBidPrice, bestAskPrice));
 
-        //evaluate the algo logic
         var action = createAlgoLogic().evaluate(state);
 
         //assert that the action taken is to cancel the buy order
         assertTrue(action instanceof CancelChildOrder);
         CancelChildOrder cancelAction = (CancelChildOrder) action;
 
-        // Calculate expected profit: (bestAskPrice - buyPrice) * quantity
+        // Calculate expected profit
         long expectedProfitOrLoss = calculateProfitOrLoss(100L, bestAskPrice, 50L);
         logProfitOrLoss(expectedProfitOrLoss);
-
-        
 
         assertNotNull(cancelAction.toString());
     }
@@ -121,8 +112,6 @@ public class MyAlgoTest extends AbstractAlgoTest {
 
     @Test
     public void testDispatchThroughSequencer() throws Exception {
-       // Test case to check if orders are created and canceled correctly through sequencer
-
         // First tick: Below BUY_THRESHOLD, should create a buy order
         send(createTick1());
         assertEquals(1, container.getState().getChildOrders().size());
@@ -148,7 +137,6 @@ public class MyAlgoTest extends AbstractAlgoTest {
     }
 
     private SimpleAlgoState mockState(long bestBidPrice, long bestAskPrice) {
-        // Mock state with no active orders
         return mockState(bestBidPrice, bestAskPrice, null, 0L, 0L);
     }
 
@@ -191,8 +179,6 @@ public class MyAlgoTest extends AbstractAlgoTest {
         final UnsafeBuffer directBuffer = new UnsafeBuffer(byteBuffer);
 
         BookUpdateEncoder encoder = new BookUpdateEncoder();
-       //messages.marketdata.MessageHeaderEncoder headerEncoder = new messages.marketdata.MessageHeaderEncoder();
-
         MessageHeaderEncoder headerEncoder = new MessageHeaderEncoder();
 
         encoder.wrapAndApplyHeader(directBuffer, 0, headerEncoder);
@@ -216,21 +202,21 @@ public class MyAlgoTest extends AbstractAlgoTest {
 
     private UnsafeBuffer createTick1() {
         // Simulates a market condition where the bid price is below the BUY_THRESHOLD
-        return createSampleMarketData(95L, 110L);  // bidPrice=95L, askPrice=110L
+        return createSampleMarketData(95L, 110L); 
     }
 
     private UnsafeBuffer createTick2() {
         // Simulates a market condition where the ask price is above the SELL_THRESHOLD
-        return createSampleMarketData(115L, 125L);  // bidPrice=115L, askPrice=125L
+        return createSampleMarketData(115L, 125L);  
     }
 
     private UnsafeBuffer createTick3() {
         // Simulates a market condition where no thresholds are crossed
-        return createSampleMarketData(105L, 115L);  // bidPrice=105L, askPrice=115L
+        return createSampleMarketData(105L, 115L);  
     }
 
     private UnsafeBuffer createTick4() {
         // Simulates a market condition with minimal price movement (no action should be taken)
-        return createSampleMarketData(100L, 120L);  // bidPrice=100L, askPrice=120L
+        return createSampleMarketData(100L, 120L);
     }
 }
