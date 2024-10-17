@@ -30,7 +30,7 @@ Key Features
         * If profit > 0: Cancels the buy order and logs the profit.
         * If profit == 0: Logs that no action is taken.
         * If profit < 0: Cancels the buy order and logs the loss.
-        
+
 Methods
 * evaluate(SimpleAlgoState state): This method analyzes the current market state to determine if the algorithm should create or cancel orders. It logs the relevant details and returns the appropriate action (create or cancel an order, or no action).
 
@@ -66,6 +66,7 @@ Methods
 * createAlgoLogic(): Instantiates the MyAlgoLogic class, setting up the environment for testing.
 * testCreateBuyOrder(): Tests the creation of a buy order when conditions are met (bid price below BUY_THRESHOLD).
 * testCancelBuyOrder(): Tests the cancellation of a buy order when the ask price exceeds the SELL_THRESHOLD and logs the expected profit or loss.
+* testCancelBuyOrderWithLoss() : Tests the cancellation of a buy order when there is a loss.
 * testNoAction(): Validates that no actions are taken when market conditions do not meet the thresholds.
 * testDispatchThroughSequencer(): Tests the sequential processing of market data ticks to ensure proper order management and profit/loss logging.
 * Utility Methods:
@@ -136,7 +137,7 @@ Functions
 
 LOGIC EXPLANATION
 
-The trading algorithm application is designed to analyze market data, execute trades based on predefined thresholds, manage orders effectively, and provide an interactive user interface (UI) for monitoring and controlling trading activities. Below is a description of the main logic and flow of the application, including both the backend logic and the UI components:
+My trading algorithm application is designed to analyze market data, execute trades based on predefined thresholds, manage orders effectively, and provide an interactive user interface (UI) for monitoring and controlling trading activities. Below is a description of the main logic and flow of the application, including both the backend logic and the UI components:
 
 Market Data Processing:
 * The application begins by receiving market data ticks, which represent real-time bid and ask prices. These ticks are processed through the MyAlgoLogic class, where they are evaluated against the predefined buy and sell thresholds (BUY_THRESHOLD and SELL_THRESHOLD).

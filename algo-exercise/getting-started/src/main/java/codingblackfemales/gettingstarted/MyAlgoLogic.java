@@ -35,10 +35,25 @@ public class MyAlgoLogic implements AlgoLogic {
         logger.info("[MYALGO] The state of the order book is:\n" + orderBookAsString);
         
         BidLevel bestBid = state.getBidAt(0);
+        if (bestBid == null) {
+            logger.info("No best bid available.");
+            return NoAction.NoAction;
+        }
         long bestBidPrice = bestBid.price;
 
         AskLevel bestAsk = state.getAskAt(0);
+        if (bestAsk == null) {
+            logger.info("No best ask available.");
+            return NoAction.NoAction;
+        }
         long bestAskPrice = bestAsk.price;
+
+        // Validate prices
+        if (isInvalidPrice(bestBidPrice) || isInvalidPrice(bestAskPrice)) {
+            logger.warn("Invalid market data received: Bid Price: " + bestBidPrice + ", Ask Price: " + bestAskPrice);
+            return NoAction.NoAction; // Reject invalid data
+        }
+
 
         logger.info("Best Bid Price: " + bestBidPrice);
     logger.info("Best Ask Price: " + bestAskPrice);
@@ -64,18 +79,19 @@ public class MyAlgoLogic implements AlgoLogic {
         if (orderToCancel != null) {
             //Makes sure algo doesn't attempt to sell without having a corresponding buy order
             long buyPrice = buyPrices.getOrDefault(orderToCancel.getOrderId(), 0L);
+
             long profit = (bestAskPrice - buyPrice) * ORDER_QUANTITY;
             
            // Handle profit scenarios
         if (profit > 0) {
-            logger.info("Cancelling order at price: " + orderToCancel.getPrice() + ", Profit: " + profit);
+            logger.info("Selling at price: " + bestAskPrice + ", Profit: " + profit);
             buyPrices.remove(buyPrice); // remove buy price if order is canceled
             return new CancelChildOrder(orderToCancel);
 
         } else if (profit == 0) {
             logger.info("Order at price: " + orderToCancel.getPrice() + " has no profit. No action taken.");
             return NoAction.NoAction; 
-            
+
         } else { // profit < 0
             long loss = -profit;
             logger.info("Cancelling order at price: " + orderToCancel.getPrice() + ", Loss: " + loss);
@@ -87,6 +103,9 @@ public class MyAlgoLogic implements AlgoLogic {
 
     //Default if no actions are met.
         return NoAction.NoAction;
+}
+private boolean isInvalidPrice(long price) {
+    return price <= 0; // Add any other invalid conditions here
 }
 }
 

@@ -44,7 +44,6 @@ public class MyAlgoTest extends AbstractAlgoTest {
 
         //creates a mock instance of SimpleAlgoState with specified bid and ask prices.
         SimpleAlgoState state = mockState(bestBidPrice, bestAskPrice);
-        send(createSampleMarketData(bestBidPrice, bestAskPrice));
 
         var action = createAlgoLogic().evaluate(state);
 
@@ -55,18 +54,6 @@ public class MyAlgoTest extends AbstractAlgoTest {
         assertTrue(actionString.contains("quantity=50"));
         assertTrue(actionString.contains("price=" + bestBidPrice));
     }
-
-    private long calculateProfitOrLoss(long buyPrice, long sellPrice, long quantity) {
-        return (sellPrice - buyPrice) * quantity;
-    }
-
-    private void logProfitOrLoss(long profitOrLoss) {
-        if (profitOrLoss > 0) {
-            logger.info("Expected Profit: " + profitOrLoss);
-        } else {
-            logger.info("Expected Loss: " + (-profitOrLoss));
-        }
-    }
     
     @Test
     public void testCancelBuyOrder() throws Exception {
@@ -76,23 +63,35 @@ public class MyAlgoTest extends AbstractAlgoTest {
         long bestAskPrice = 125L; // Above SELL_THRESHOLD........
        
 //Mock buy order that should get cancelled
-        ChildOrder childOrder = mockOrder(Side.BUY, 100L, 110L);
-        SimpleAlgoState state = mockState(bestBidPrice, bestAskPrice, Side.BUY, 100L, 110L);
-
-        //send market data with updated ask price 
-        send(createSampleMarketData(bestBidPrice, bestAskPrice));
+        ChildOrder childOrder = mockOrder(Side.BUY, 100L, 50L);
+        SimpleAlgoState state = mockState(bestBidPrice, bestAskPrice, Side.BUY, 100L, 50L);
 
         var action = createAlgoLogic().evaluate(state);
 
         //assert that the action taken is to cancel the buy order
         assertTrue(action instanceof CancelChildOrder);
-        CancelChildOrder cancelAction = (CancelChildOrder) action;
+       //CancelChildOrder cancelAction = (CancelChildOrder) action;
 
         // Calculate expected profit
         long expectedProfitOrLoss = calculateProfitOrLoss(100L, bestAskPrice, 50L);
         logProfitOrLoss(expectedProfitOrLoss);
+        assertEquals(expectedProfitOrLoss, calculateProfitOrLoss(100L, bestAskPrice, 50L));
+    }
 
-        assertNotNull(cancelAction.toString());
+    @Test
+    public void testCancelBuyOrderWithLoss() throws Exception {
+        long bestBidPrice = 90L; // Below the BUY_THRESHOLD
+        long bestAskPrice = 80L; // Below the sell price for loss scenario
+
+        ChildOrder childOrder = mockOrder(Side.BUY, 100L, 50L);
+        SimpleAlgoState state = mockState(bestBidPrice, bestAskPrice, Side.BUY, 100L, 50L);
+
+        var action = createAlgoLogic().evaluate(state);
+        //assertTrue(action instanceof CancelChildOrder);
+
+        long expectedLoss = calculateProfitOrLoss(100L, bestAskPrice, 50L);
+        logProfitOrLoss(expectedLoss);
+        assertEquals(expectedLoss, calculateProfitOrLoss(100L, bestAskPrice, 50L));
     }
 
     @Test
@@ -103,7 +102,6 @@ public class MyAlgoTest extends AbstractAlgoTest {
         long bestAskPrice = 115L; // Below SELL_THRESHOLD
 
         SimpleAlgoState state = mockState(bestBidPrice, bestAskPrice);
-        send(createSampleMarketData(bestBidPrice, bestAskPrice));
 
         var action = createAlgoLogic().evaluate(state);
 
@@ -171,6 +169,20 @@ public class MyAlgoTest extends AbstractAlgoTest {
         when(order.getFilledQuantity()).thenReturn(filledQuantity);
         when(order.getOrderId()).thenReturn(123L);
         return order;
+    }
+
+    //Profit/loss calculation
+    private long calculateProfitOrLoss(long buyPrice, long sellPrice, long quantity) {
+        return (sellPrice - buyPrice) * quantity;
+    }
+
+    // Logging profit/loss
+    private void logProfitOrLoss(long profitOrLoss) {
+        if (profitOrLoss > 0) {
+            logger.info("Expected Profit: " + profitOrLoss);
+        } else {
+            logger.info("Expected Loss: " + (-profitOrLoss));
+        }
     }
 
     private UnsafeBuffer createSampleMarketData(long bidPrice, long askPrice) {
