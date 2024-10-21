@@ -12,8 +12,6 @@ const getWidthBasedOnQuantity = (quantity: number) => {
   const maxQuantityScale = 4000;
   const minWidth = 40;
   const calculatedWidth = (quantity / maxQuantityScale) * 100; // Percentage width
-
- 
   return Math.max(minWidth, calculatedWidth); 
 };
 

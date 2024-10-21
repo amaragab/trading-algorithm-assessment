@@ -53,7 +53,6 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
 
     @Test
     public void testSellCondition() throws Exception {
-        // Test case where the best ask price is above the SELL_THRESHOLD, should cancel a buy order
  // Send market data where ask price is above the SELL_THRESHOLD.......
          long newBidPrice = 110L;  
          long newAskPrice = 130L;  
@@ -69,9 +68,6 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
          assertEquals(1, state.getChildOrders().size()); 
         logger.info("State after creating buy order: " + state);
 
-       // assertEquals(95L, state.getChildOrders().get(0).getPrice());
-
-   
     // Calculate expected profit/loss
         long profitOrLoss = calculateProfitOrLoss(buyPrice, newAskPrice, 50L);
         logger.info(profitOrLoss > 0 ? "Expected Profit: " + profitOrLoss : "Expected Loss: " + (-profitOrLoss));
