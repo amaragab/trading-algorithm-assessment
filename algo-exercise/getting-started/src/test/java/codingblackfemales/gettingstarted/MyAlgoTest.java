@@ -70,7 +70,7 @@ public class MyAlgoTest extends AbstractAlgoTest {
 
         //assert that the action taken is to cancel the buy order
         assertTrue(action instanceof CancelChildOrder);
-       //CancelChildOrder cancelAction = (CancelChildOrder) action;
+      
 
         // Calculate expected profit
         long expectedProfitOrLoss = calculateProfitOrLoss(100L, bestAskPrice, 50L);
@@ -87,7 +87,7 @@ public class MyAlgoTest extends AbstractAlgoTest {
         SimpleAlgoState state = mockState(bestBidPrice, bestAskPrice, Side.BUY, 100L, 50L);
 
         var action = createAlgoLogic().evaluate(state);
-        //assertTrue(action instanceof CancelChildOrder);
+       
 
         long expectedLoss = calculateProfitOrLoss(100L, bestAskPrice, 50L);
         logProfitOrLoss(expectedLoss);

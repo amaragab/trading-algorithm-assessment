@@ -44,7 +44,7 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
                                    .reduce(Long::sum)
                                    .orElse(0L);
 
-         // No fill should occur immediately as the market price hasn’t reached the buy order price
+         
          assertEquals(0L, filledQuantity);
     }
     private long calculateProfitOrLoss(long buyPrice, long sellPrice, long quantity) {
@@ -72,13 +72,13 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
         long profitOrLoss = calculateProfitOrLoss(buyPrice, newAskPrice, 50L);
         logger.info(profitOrLoss > 0 ? "Expected Profit: " + profitOrLoss : "Expected Loss: " + (-profitOrLoss));
 
-          // Calculate and assert the total filled quantity
+         
          long filledQuantity = state.getChildOrders().stream()
           .map(ChildOrder::getFilledQuantity)
           .reduce(Long::sum)
           .orElse(0L);
 
-        // No fill should occur as the order was canceled
+       
          assertEquals(0L, filledQuantity);
 
           // Check the active child orders count
@@ -147,7 +147,6 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
     }
 
     private UnsafeBuffer createSampleMarketData(long bidPrice, long askPrice) {
-        // This method constructs a market data tick with the given bid and ask prices
         final ByteBuffer byteBuffer = ByteBuffer.allocateDirect(1024);
         final UnsafeBuffer directBuffer = new UnsafeBuffer(byteBuffer);
 
