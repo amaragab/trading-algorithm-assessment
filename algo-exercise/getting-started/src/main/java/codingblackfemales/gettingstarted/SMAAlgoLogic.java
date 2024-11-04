@@ -13,7 +13,7 @@ import messages.order.Side;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class SMAAlgoLogic implements AlgoLogic{
+public class SMAAlgoLogic implements AlgoLogic {
     private static final long BUY_THRESHOLD = 90L;
     private static final long SELL_THRESHOLD = 110L;
     private static final int SMA_PERIOD = 5; // Time period for the Simple Moving Average
@@ -23,36 +23,36 @@ public class SMAAlgoLogic implements AlgoLogic{
 
     @Override
     public Action evaluate(SimpleAlgoState state) {
-        // Get the best bid level (index 0)
-        if (state.getBidLevels() > 0) { 
-            BidLevel bestBid = state.getBidAt(0); 
+        // Ensure we have at least one bid level
+        if (state.getBidLevels() > 0) {
+            BidLevel bestBid = state.getBidAt(0);
             long currentPrice = bestBid.getPrice();
 
-        // Add current price to the window
-        priceWindow.add(currentPrice);
+            // Add the current price to the window
+            priceWindow.add(currentPrice);
 
-        // Maintain the fixed period for SMA
-        if (priceWindow.size() > SMA_PERIOD) {
-            priceWindow.poll(); // Remove the oldest price
-        }
+            // Maintain the fixed period for SMA
+            if (priceWindow.size() > SMA_PERIOD) {
+                priceWindow.poll(); // Remove the oldest price
+            }
 
-        
-        sma = calculateSMA();
+            // Calculate the SMA
+            sma = calculateSMA();
 
-        // Trading logic based on SMA
-        if (sma <= BUY_THRESHOLD) {
-            return new CreateChildOrder(Side.BUY, currentPrice, 50L);
-        } else if (sma >= SELL_THRESHOLD) {
-            // Cancel all child orders
-            for (ChildOrder order : state.getActiveChildOrders()) {
-                return new CancelChildOrder(order); 
+            // Trading logic based on SMA
+            if (sma <= BUY_THRESHOLD) {
+                return new CreateChildOrder(Side.BUY, currentPrice, 50L);
+            } else if (sma >= SELL_THRESHOLD) {
+                // Cancel the first active child order (for simplicity in this example)
+                if (!state.getActiveChildOrders().isEmpty()) {
+                    ChildOrder orderToCancel = state.getActiveChildOrders().get(0);
+                    return new CancelChildOrder(orderToCancel);
+                }
             }
         }
-    }
-        return new NoAction();
-    
-     }
 
+        return new NoAction(); // Default return if no conditions are met
+    }
 
     private long calculateSMA() {
         if (priceWindow.isEmpty()) return 0;
@@ -63,5 +63,4 @@ public class SMAAlgoLogic implements AlgoLogic{
         }
         return sum / priceWindow.size();
     }
-
 }
