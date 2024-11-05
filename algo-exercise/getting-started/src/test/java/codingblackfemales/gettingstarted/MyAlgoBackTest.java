@@ -31,10 +31,8 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
 
         send(createMarketTick(90L, 100L));
 
-        // Get the state of the order book after the market tick
         var state = container.getState();
 
-        // Check that a buy order was created
         assertEquals(1, state.getChildOrders().size());
         assertEquals(90L, state.getChildOrders().get(0).getPrice()); 
         assertEquals(50L, state.getChildOrders().get(0).getQuantity()); 
@@ -48,14 +46,13 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
 
     @Test
     public void testSellCondition() throws Exception {
- // Send market data where ask price is above the SELL_THRESHOLD.......
+
          long newBidPrice = 110L;  
          long newAskPrice = 130L;  
          send(createMarketTick(newBidPrice, newAskPrice)); 
          var state = container.getState();
          assertEquals(0, state.getChildOrders().size());
 
-         // Create a buy order to be canceled
          long buyPrice = 93L;  
          long askPrice = 113L; 
          send(createMarketTick(buyPrice, askPrice)); 
@@ -70,13 +67,11 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
        
          assertEquals(0L, filledQuantity);
 
-          // Check the active child orders count
         assertEquals(1, state.getActiveChildOrders().size());
     }
 
     @Test
     public void testNoAction() throws Exception {
-        // Test case where no conditions are met, should return NoAction..........
         send(createMarketTick(110L, 115L)); 
         var state = container.getState();
         assertEquals(0, state.getChildOrders().size());
@@ -93,23 +88,19 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
     public void testDispatchThroughSequencer() throws Exception {
         // Test the sequence of actions through multiple market ticks
 
-// First tick: Above SELL_THRESHOLD, should cancel the buy order.............
        long newBidPrice = 115L; 
        long newAskPrice = 130L; 
        send(createMarketTick(newBidPrice, newAskPrice));
         assertEquals(0, container.getState().getActiveChildOrders().size());
 
-        // Second tick: Below BUY_THRESHOLD, should create a buy order
         long buyPrice = 95L;  
         long askPrice = 110L;  
         send(createMarketTick(buyPrice, askPrice)); 
         assertEquals(1, container.getState().getChildOrders().size());
 
-        // Third tick: No action should be taken (prices within thresholds)
-        send(createMarketTick(105L, 115L)); // bidPrice=105L, askPrice=115L
+        send(createMarketTick(105L, 115L));
         assertEquals(1, container.getState().getActiveChildOrders().size());
 
-        // Fourth tick: Still no action should be taken (prices within thresholds)
         send(createMarketTick(100L, 120L)); 
         assertEquals(1, container.getState().getActiveChildOrders().size());
 

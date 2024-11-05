@@ -62,7 +62,7 @@ public class MyAlgoTest extends AbstractAlgoTest {
         long bestBidPrice = 115L; 
         long bestAskPrice = 125L; // Above SELL_THRESHOLD........
        
-//Mock buy order that should get cancelled
+
         ChildOrder childOrder = mockOrder(Side.BUY, 100L, 50L);
         SimpleAlgoState state = mockState(bestBidPrice, bestAskPrice, Side.BUY, 100L, 50L);
 
@@ -76,8 +76,8 @@ public class MyAlgoTest extends AbstractAlgoTest {
     public void testNoAction() throws Exception {
         // Test case where no conditions are met, should return NoAction
 
-        long bestBidPrice = 110L; // Above BUY_THRESHOLD
-        long bestAskPrice = 115L; // Below SELL_THRESHOLD
+        long bestBidPrice = 110L;
+        long bestAskPrice = 115L; 
 
         SimpleAlgoState state = mockState(bestBidPrice, bestAskPrice);
 

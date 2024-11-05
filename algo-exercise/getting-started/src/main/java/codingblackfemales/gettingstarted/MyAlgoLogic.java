@@ -65,6 +65,7 @@ public class MyAlgoLogic implements AlgoLogic {
 
     private boolean shouldSell(long bestAskPrice, List<ChildOrder>activeOrders) {
         return bestAskPrice > MyAlgoLogicConfig.SELL_THRESHOLD &&
+        //Only sell if there is an active buy order to be cancelled
                activeOrders.stream().anyMatch(order -> order.getSide() == Side.BUY && order.getPrice() <= bestAskPrice);
     }
 

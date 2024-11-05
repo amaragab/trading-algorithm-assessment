@@ -1,4 +1,4 @@
-Market Depth Trading Algorithm Project
+* Market Depth Trading Algorithm Project
 
 The goal of this project is to develop a trading algorithm that uses market depth data to automate the buying and selling of financial instruments.The main objective is to develop a strong and effective trading strategy that minimizes risks and optimizes earnings.
 By analyzing bid and ask prices, along with their respective quantities, the algorithm makes informed decisions about when to enter and exit trades. This approach addresses common challenges in trading, such as timing the market and executing orders quickly, allowing traders to capitalize on favorable price movements without constant manual oversight.
@@ -12,7 +12,7 @@ Overview
 MyAlgoLogic implements the AlgoLogic interface and encapsulates the algorithm's decision-making logic for trading operations. It evaluates market conditions and decides when to create or cancel child orders based on predefined thresholds for buying and selling.
 
 Key Features
-* Buy and Sell Thresholds:
+* Buy and Sell Thresholds which are held in the MyAlgoCongif class:
     * BUY_THRESHOLD: The algorithm initiates a buy order when the best bid price is below this threshold (set at 100). 
     * SELL_THRESHOLD: The algorithm considers selling when the best ask price exceeds this threshold (set at 120). 
 * Order Quantity: The algorithm operates with a fixed quantity for each trade (set at 50 shares).
@@ -32,7 +32,29 @@ Key Features
         * If profit < 0: Cancels the buy order and logs the loss.
 
 Methods
-* evaluate(SimpleAlgoState state): This method analyzes the current market state to determine if the algorithm should create or cancel orders. It logs the relevant details and returns the appropriate action (create or cancel an order, or no action).
+* evaluate(SimpleAlgoState state):
+This method is the entry point for evaluating the market state. It checks the best bid and ask prices, validates them, and decides whether to create a buy order, sell an existing order, or take no action.
+
+* shouldBuy(long bestBidPrice, List<ChildOrder> activeOrders):
+Determines if a buy order should be placed based on the current best bid price and active orders. It checks if the bid price is below the configured BUY_THRESHOLD and ensures that no active buy orders exist at that price.
+
+* createBuyOrder(long bestBidPrice):
+Constructs and returns a CreateChildOrder action for placing a buy order. It logs the action and updates the buy price record.
+
+* shouldSell(long bestAskPrice, List<ChildOrder> activeOrders):
+Checks if a sell order can be placed by ensuring the ask price exceeds the SELL_THRESHOLD and there is at least one active buy order to cancel.
+
+* processSellOrder(long bestAskPrice, List<ChildOrder> activeOrders):
+This method processes the selling of an asset. It identifies an active buy order to cancel and calculates the profit or loss from the transaction.
+
+* handleProfitOrLoss(long buyPrice, long bestAskPrice):
+Computes the profit or loss based on the difference between the buy price and the selling price multiplied by the order quantity.
+
+* bookProfitOrLoss(long profitOrLoss, long bestAskPrice, ChildOrder orderToCancel):
+This method logs the outcome of the trade (profit, no profit, or loss) and returns the appropriate action to cancel the order.
+
+* isInvalidPrice(long price):
+A utility function that checks if the price is invalid (e.g., negative or zero).
 
 SMAAlgoLogic
 
@@ -66,7 +88,6 @@ Methods
 * createAlgoLogic(): Instantiates the MyAlgoLogic class, setting up the environment for testing.
 * testCreateBuyOrder(): Tests the creation of a buy order when conditions are met (bid price below BUY_THRESHOLD).
 * testCancelBuyOrder(): Tests the cancellation of a buy order when the ask price exceeds the SELL_THRESHOLD and logs the expected profit or loss.
-* testCancelBuyOrderWithLoss() : Tests the cancellation of a buy order when there is a loss.
 * testNoAction(): Validates that no actions are taken when market conditions do not meet the thresholds.
 * testDispatchThroughSequencer(): Tests the sequential processing of market data ticks to ensure proper order management and profit/loss logging.
 * Utility Methods:
