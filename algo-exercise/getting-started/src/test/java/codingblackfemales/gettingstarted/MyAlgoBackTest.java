@@ -38,17 +38,12 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
         assertEquals(1, state.getChildOrders().size());
         assertEquals(90L, state.getChildOrders().get(0).getPrice()); 
         assertEquals(50L, state.getChildOrders().get(0).getQuantity()); 
-
         long filledQuantity = state.getChildOrders().stream()
-                                   .map(ChildOrder::getFilledQuantity)
-                                   .reduce(Long::sum)
-                                   .orElse(0L);
+                               .map(ChildOrder::getFilledQuantity)
+                               .reduce(Long::sum)
+                               .orElse(0L);
 
-         
-         assertEquals(0L, filledQuantity);
-    }
-    private long calculateProfitOrLoss(long buyPrice, long sellPrice, long quantity) {
-        return (sellPrice - buyPrice) * quantity;
+    assertEquals(Long.valueOf(0L), Long.valueOf(filledQuantity));
     }
 
     @Test
@@ -66,12 +61,6 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
          send(createMarketTick(buyPrice, askPrice)); 
          state = container.getState();
          assertEquals(1, state.getChildOrders().size()); 
-        logger.info("State after creating buy order: " + state);
-
-    // Calculate expected profit/loss
-        long profitOrLoss = calculateProfitOrLoss(buyPrice, newAskPrice, 50L);
-        logger.info(profitOrLoss > 0 ? "Expected Profit: " + profitOrLoss : "Expected Loss: " + (-profitOrLoss));
-
          
          long filledQuantity = state.getChildOrders().stream()
           .map(ChildOrder::getFilledQuantity)
@@ -115,13 +104,6 @@ public class MyAlgoBackTest extends AbstractAlgoBackTest {
         long askPrice = 110L;  
         send(createMarketTick(buyPrice, askPrice)); 
         assertEquals(1, container.getState().getChildOrders().size());
-
-       
-
-   // Check profit or loss after cancellation
-   long profitOrLoss = calculateProfitOrLoss(buyPrice, newAskPrice, 50L);
-   logger.info(profitOrLoss > 0 ? "Expected Profit: " + profitOrLoss : "Expected Loss: " + (-profitOrLoss));
-
 
         // Third tick: No action should be taken (prices within thresholds)
         send(createMarketTick(105L, 115L)); // bidPrice=105L, askPrice=115L

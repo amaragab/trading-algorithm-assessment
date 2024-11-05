@@ -5,6 +5,7 @@ import codingblackfemales.action.CreateChildOrder;
 import codingblackfemales.action.Action;
 import codingblackfemales.action.NoAction;
 import codingblackfemales.algo.AlgoLogic;
+import codingblackfemales.sotw.ChildOrder;
 import codingblackfemales.sotw.SimpleAlgoState;
 import codingblackfemales.sotw.marketdata.BidLevel;
 import codingblackfemales.sotw.marketdata.AskLevel;
@@ -14,98 +15,94 @@ import messages.order.Side;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MyAlgoLogic implements AlgoLogic {
 
     private static final Logger logger = LoggerFactory.getLogger(MyAlgoLogic.class);
 
-     
-    private static final long BUY_THRESHOLD = 100L;
-    private static final long SELL_THRESHOLD = 120L;
-    private static final long ORDER_QUANTITY = 50L;
-
-    
     private Map<Long, Long> buyPrices = new HashMap<>();
 
+    
     @Override
     public Action evaluate(SimpleAlgoState state) {
-
         var orderBookAsString = Util.orderBookToString(state);
         logger.info("[MYALGO] The state of the order book is:\n" + orderBookAsString);
-        
+
         BidLevel bestBid = state.getBidAt(0);
-        if (bestBid == null) {
-            logger.info("No best bid available.");
-            return NoAction.NoAction;
-        }
-        long bestBidPrice = bestBid.price;
-
         AskLevel bestAsk = state.getAskAt(0);
-        if (bestAsk == null) {
-            logger.info("No best ask available.");
+
+        if (bestBid == null || bestAsk == null || isInvalidPrice(bestBid.price) || isInvalidPrice(bestAsk.price)) {
+            logger.warn("Invalid or incomplete market data received.");
             return NoAction.NoAction;
         }
+
+        long bestBidPrice = bestBid.price;
         long bestAskPrice = bestAsk.price;
-
-        // Validate prices
-        if (isInvalidPrice(bestBidPrice) || isInvalidPrice(bestAskPrice)) {
-            logger.warn("Invalid market data received: Bid Price: " + bestBidPrice + ", Ask Price: " + bestAskPrice);
-            return NoAction.NoAction; // Reject invalid data
-        }
-
-
-        logger.info("Best Bid Price: " + bestBidPrice);
-    logger.info("Best Ask Price: " + bestAskPrice);
         
         var activeOrders = state.getActiveChildOrders();
-        logger.info("Active Orders: " + activeOrders);
 
-        if (bestBidPrice < BUY_THRESHOLD) {
-        if (activeOrders.stream().noneMatch(order -> order.getPrice() == bestBidPrice && order.getSide() == Side.BUY)) { 
-         logger.info("Creating buy order at price: " + bestBidPrice);
-         
-         buyPrices.put(bestBidPrice, bestBidPrice);  
-        return new CreateChildOrder(Side.BUY, ORDER_QUANTITY, bestBidPrice);
-    } 
-     }
+        if (shouldBuy(bestBidPrice, activeOrders)) {
+            return createBuyOrder(bestBidPrice);
+        } else if (shouldSell(bestAskPrice, activeOrders)) {
+            return processSellOrder(bestAskPrice, activeOrders);
+        }
 
-     if (bestAskPrice > SELL_THRESHOLD) {
+        return NoAction.NoAction;
+    }
+
+    private boolean shouldBuy(long bestBidPrice, List<ChildOrder>activeOrders) {
+        return bestBidPrice < MyAlgoLogicConfig.BUY_THRESHOLD && 
+               activeOrders.stream().noneMatch(order -> order.getPrice() == bestBidPrice && order.getSide() == Side.BUY);
+    }
+
+    private Action createBuyOrder(long bestBidPrice) {
+        logger.info("Creating buy order at price: " + bestBidPrice);
+        buyPrices.put(bestBidPrice, bestBidPrice);
+        return new CreateChildOrder(Side.BUY, MyAlgoLogicConfig.ORDER_QUANTITY, bestBidPrice);
+    }
+
+    private boolean shouldSell(long bestAskPrice, List<ChildOrder>activeOrders) {
+        return bestAskPrice > MyAlgoLogicConfig.SELL_THRESHOLD &&
+               activeOrders.stream().anyMatch(order -> order.getSide() == Side.BUY && order.getPrice() <= bestAskPrice);
+    }
+
+    private Action processSellOrder(long bestAskPrice, List<ChildOrder> activeOrders) {
         var orderToCancel = activeOrders.stream()
-            .filter(order -> order.getSide() == Side.BUY && order.getPrice() <= bestAskPrice)
-            .findFirst()
-            .orElse(null);
-    
+                .filter(order -> order.getSide() == Side.BUY && order.getPrice() <= bestAskPrice)
+                .findFirst()
+                .orElse(null);
+
         if (orderToCancel != null) {
-            //Makes sure algo doesn't attempt to sell without having a corresponding buy order
             long buyPrice = buyPrices.getOrDefault(orderToCancel.getOrderId(), 0L);
+            long profitOrLoss = handleProfitOrLoss(buyPrice, bestAskPrice);
+            return bookProfitOrLoss(profitOrLoss, bestAskPrice, orderToCancel);
+        }
+        return NoAction.NoAction;
+    }
 
-            long profit = (bestAskPrice - buyPrice) * ORDER_QUANTITY;
-            
-           // Handle profit scenarios
-        if (profit > 0) {
-            logger.info("Selling at price: " + bestAskPrice + ", Profit: " + profit);
-            buyPrices.remove(buyPrice); // remove buy price if order is canceled
+    private long handleProfitOrLoss(long buyPrice, long bestAskPrice) {
+        return (bestAskPrice - buyPrice) * MyAlgoLogicConfig.ORDER_QUANTITY;
+    }
+
+    private Action bookProfitOrLoss(long profitOrLoss, long bestAskPrice, ChildOrder orderToCancel) {
+        if (profitOrLoss > 0) {
+            logger.info("Selling at price: " + bestAskPrice + ", Profit: " + profitOrLoss);
+            buyPrices.remove(orderToCancel.getPrice());
             return new CancelChildOrder(orderToCancel);
-
-        } else if (profit == 0) {
+        } else if (profitOrLoss == 0) {
             logger.info("Order at price: " + orderToCancel.getPrice() + " has no profit. No action taken.");
-            return NoAction.NoAction; 
-
-        } else { // profit < 0
-            long loss = -profit;
+            return NoAction.NoAction;
+        } else {
+            long loss = -profitOrLoss;
             logger.info("Cancelling order at price: " + orderToCancel.getPrice() + ", Loss: " + loss);
-            buyPrices.remove(buyPrice); 
+            buyPrices.remove(orderToCancel.getOrderId());
             return new CancelChildOrder(orderToCancel);
         }
     }
+
+    private boolean isInvalidPrice(long price) {
+        return price <= 0;
     }
-
-    //Default if no actions are met.
-        return NoAction.NoAction;
 }
-private boolean isInvalidPrice(long price) {
-    return price <= 0; // Add any other invalid conditions here
-}
-}
-

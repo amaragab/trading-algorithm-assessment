@@ -70,29 +70,7 @@ public class MyAlgoTest extends AbstractAlgoTest {
 
         //assert that the action taken is to cancel the buy order
         assertTrue(action instanceof CancelChildOrder);
-      
-
-        // Calculate expected profit
-        long expectedProfitOrLoss = calculateProfitOrLoss(100L, bestAskPrice, 50L);
-        logProfitOrLoss(expectedProfitOrLoss);
-        assertEquals(expectedProfitOrLoss, calculateProfitOrLoss(100L, bestAskPrice, 50L));
-    }
-
-    @Test
-    public void testCancelBuyOrderWithLoss() throws Exception {
-        long bestBidPrice = 90L; // Below the BUY_THRESHOLD
-        long bestAskPrice = 80L; // Below the sell price for loss scenario
-
-        ChildOrder childOrder = mockOrder(Side.BUY, 100L, 50L);
-        SimpleAlgoState state = mockState(bestBidPrice, bestAskPrice, Side.BUY, 100L, 50L);
-
-        var action = createAlgoLogic().evaluate(state);
-       
-
-        long expectedLoss = calculateProfitOrLoss(100L, bestAskPrice, 50L);
-        logProfitOrLoss(expectedLoss);
-        assertEquals(expectedLoss, calculateProfitOrLoss(100L, bestAskPrice, 50L));
-    }
+}
 
     @Test
     public void testNoAction() throws Exception {
@@ -117,13 +95,6 @@ public class MyAlgoTest extends AbstractAlgoTest {
         // Second tick: Above SELL_THRESHOLD, should cancel the buy order
         send(createTick2());
         assertEquals(0, container.getState().getActiveChildOrders().size());
-
-        // Log profit or loss based on ask price and buy price......
-        long buyPrice = 95L;
-        long sellPrice = 125L;
-        long profitOrLoss = calculateProfitOrLoss(buyPrice, sellPrice, 50L);
-        logProfitOrLoss(profitOrLoss);
-
 
         // Third tick: No action should be taken (prices within thresholds)
         send(createTick3());
@@ -169,20 +140,6 @@ public class MyAlgoTest extends AbstractAlgoTest {
         when(order.getFilledQuantity()).thenReturn(filledQuantity);
         when(order.getOrderId()).thenReturn(123L);
         return order;
-    }
-
-    //Profit/loss calculation
-    private long calculateProfitOrLoss(long buyPrice, long sellPrice, long quantity) {
-        return (sellPrice - buyPrice) * quantity;
-    }
-
-    // Logging profit/loss
-    private void logProfitOrLoss(long profitOrLoss) {
-        if (profitOrLoss > 0) {
-            logger.info("Expected Profit: " + profitOrLoss);
-        } else {
-            logger.info("Expected Loss: " + (-profitOrLoss));
-        }
     }
 
     private UnsafeBuffer createSampleMarketData(long bidPrice, long askPrice) {
